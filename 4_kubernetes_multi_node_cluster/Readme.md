@@ -47,12 +47,12 @@ vi kind-multinode.yaml
 Add the following content:
 
 ```yaml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-- role: control-plane
-- role: worker
-- role: worker
+kind: Cluster # Cluster definition
+apiVersion: kind.x-k8s.io/v1alpha4 # API version
+nodes: # Define cluster
+- role: control-plane # Control Plane node
+- role: worker # Worker node 1
+- role: worker # Worker node 2
 ```
 
 📌 This creates:
