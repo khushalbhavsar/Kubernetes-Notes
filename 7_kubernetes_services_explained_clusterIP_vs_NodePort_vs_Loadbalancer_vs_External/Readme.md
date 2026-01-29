@@ -139,3 +139,219 @@ This diagram illustrates how external clients can access services through LoadBa
 In the flow diagram, an external client initiates a request to access a service running within the Kubernetes cluster. The request first hits the LoadBalancer, which is responsible for distributing incoming traffic across multiple NodePorts. The LoadBalancer provides a single point of entry with a public IP address, making it easy for clients to connect. The LoadBalancer then forwards the request to one of the NodePorts, which are exposed on each node in the cluster. The NodePort listens on a specific port and routes the traffic to the corresponding ClusterIP service. The ClusterIP service, which is only accessible within the cluster, then directs the traffic to the appropriate Pods that are running the application. This layered approach ensures that services are accessible both internally and externally while maintaining load balancing and service discovery capabilities.
 
 ---
+
+
+# 🧩 Kubernetes Services Example: Frontend – Backend – Database
+
+## 🏗️ Architecture Overview
+
+```text
+User
+ ↓
+LoadBalancer Service (Frontend)
+ ↓
+Frontend Pod
+ ↓
+ClusterIP Service (Backend)
+ ↓
+Backend Pod
+ ↓
+ClusterIP Service (Database)
+ ↓
+Database Pod
+```
+
+---
+
+## 1️⃣ Frontend (Public Access) – LoadBalancer Service
+
+### 📌 Why LoadBalancer?
+
+* App must be accessible from the internet
+* Cloud provider provides external IP
+
+---
+
+### 🔹 Frontend Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: nginx
+        ports:
+        - containerPort: 80
+```
+
+---
+
+### 🔹 Frontend Service (LoadBalancer)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+---
+
+## 2️⃣ Backend (Internal) – ClusterIP Service
+
+### 📌 Why ClusterIP?
+
+* Backend should NOT be public
+* Accessed only by frontend
+
+---
+
+### 🔹 Backend Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: node:18
+        ports:
+        - containerPort: 3000
+```
+
+---
+
+### 🔹 Backend Service (ClusterIP)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+  - port: 80
+    targetPort: 3000
+```
+
+---
+
+### 🔹 Frontend → Backend Call
+
+```text
+http://backend-svc
+```
+
+---
+
+## 3️⃣ Database (Private) – ClusterIP Service
+
+### 📌 Why ClusterIP?
+
+* Database should be **completely internal**
+* No external access
+
+---
+
+### 🔹 Database Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+```
+
+---
+
+### 🔹 Database Service (ClusterIP)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: db
+  ports:
+  - port: 3306
+    targetPort: 3306
+```
+
+---
+
+### 🔹 Backend → Database Call
+
+```text
+db-svc:3306
+```
+
+---
+
+## 🧠 How Service Discovery Works
+
+Kubernetes DNS automatically creates:
+
+```text
+frontend-svc
+backend-svc
+db-svc
+```
+
+Pods communicate using **service names**, not IPs.
+
+---
+
