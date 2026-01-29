@@ -295,3 +295,127 @@ security
 ✔ Only security/DevOps teams have access
 
 ---
+
+
+### 📂 Kubernetes Namespace – Common Commands (List)
+
+1. **List all namespaces**
+
+   ```bash
+   kubectl get namespaces
+   ```
+
+   ```bash
+   kubectl get ns
+   ```
+
+2. **Create a namespace**
+
+   ```bash
+   kubectl create namespace dev
+   ```
+
+3. **Describe a namespace**
+
+   ```bash
+   kubectl describe namespace dev
+   ```
+
+4. **Delete a namespace**
+
+   ```bash
+   kubectl delete namespace dev
+   ```
+
+5. **Create resource in a namespace**
+
+   ```bash
+   kubectl apply -f app.yaml -n dev
+   ```
+
+6. **List pods in a namespace**
+
+   ```bash
+   kubectl get pods -n dev
+   ```
+
+7. **List all resources in a namespace**
+
+   ```bash
+   kubectl get all -n dev
+   ```
+
+8. **List resources in all namespaces**
+
+   ```bash
+   kubectl get pods -A
+   ```
+
+9. **Set default namespace**
+
+   ```bash
+   kubectl config set-context --current --namespace=dev
+   ```
+
+10. **Check current namespace**
+
+    ```bash
+    kubectl config view --minify | grep namespace
+    ```
+
+11. **Switch back to default namespace**
+
+    ```bash
+    kubectl config set-context --current --namespace=default
+    ```
+
+12. **Define namespace in YAML**
+
+    ```yaml
+    metadata:
+      namespace: dev
+    ```
+
+13. **Delete resource from a namespace**
+
+    ```bash
+    kubectl delete pod nginx -n dev
+    ```
+
+14. **Label a namespace**
+
+    ```bash
+    kubectl label namespace dev env=development
+    ```
+
+15. **View namespace labels**
+
+    ```bash
+    kubectl get namespace dev --show-labels
+    ```
+
+16. **Check ResourceQuota in a namespace**
+
+    ```bash
+    kubectl get resourcequota -n dev
+    ```
+
+17. **Check LimitRange in a namespace**
+
+    ```bash
+    kubectl get limitrange -n dev
+    ```
+
+---
+
+### 🎯 Interview-Focused Commands
+
+```bash
+kubectl get ns
+kubectl create ns
+kubectl delete ns
+kubectl get pods -n
+kubectl config set-context --current --namespace
+```
+
+---
